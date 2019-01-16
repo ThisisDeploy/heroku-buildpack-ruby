@@ -1,3 +1,8 @@
+# Important
+
+This Buildpack is not officially supported by Heroku and has very limited support by the Bundler team. It's *strongly* recommended to test this buildpack on a test application before
+thinking of using this in production.
+
 # Heroku Buildpack for Ruby
 ![ruby](https://cloud.githubusercontent.com/assets/51578/13712725/3c6b3368-e793-11e5-83c1-728440111358.png)
 
@@ -14,7 +19,7 @@ Example Usage:
     $ ls
     Gemfile Gemfile.lock
 
-    $ heroku create --buildpack https://github.com/heroku/heroku-buildpack-ruby.git
+    $ heroku create --buildpack https://github.com/bundler/heroku-buildpack-bundler2.git
 
     $ git push heroku master
     ...
@@ -48,7 +53,7 @@ Example Usage:
     $ ls config/environment.rb
     config/environment.rb
 
-    $ heroku create --buildpack https://github.com/heroku/heroku-buildpack-ruby.git
+    $ heroku create --buildpack https://github.com/bundler/heroku-buildpack-bundler2.git
 
     $ git push heroku master
     ...
@@ -82,7 +87,7 @@ Example Usage:
     $ ls config/application.rb
     config/application.rb
 
-    $ heroku create --buildpack https://github.com/heroku/heroku-buildpack-ruby.git
+    $ heroku create --buildpack https://github.com/bundler/heroku-buildpack-bundler2.git
 
     $ git push heroku master
     -----> Heroku receiving push
@@ -124,25 +129,21 @@ To change the vendored binaries for Bundler, [Node.js](http://github.com/joyent/
 
 For example, you can change the vendored version of Bundler to 1.1.rc.
 
-First you'll need to build a Heroku-compatible version of Node.js:
-
-    $ export AWS_ID=xxx AWS_SECRET=yyy S3_BUCKET=zzz
-    $ s3 create $S3_BUCKET
-    $ rake gem:install[bundler,1.1.rc]
+    $ aws s3 mb s3://my_bucket_name
+    $ bundle install
+    $ bundle exec rake gem:install[bundler,1.1.rc]
 
 Open `lib/language_pack/ruby.rb` in your editor, and change the following line:
 
-    BUNDLER_VERSION = "1.11.2"
+    BUNDLER_VERSION = "1.1.rc"
 
-Open `lib/language_pack/base.rb` in your editor, and change the following line:
+Open `lib/language_pack/helpers/bundler_wrapper.rb` in your editor, and set the `VENDOR_URL`:
 
-    VENDOR_URL = "https://s3.amazonaws.com/zzz"
+    VENDOR_URL = "https://my_bucket_name.s3.amazonaws.com/"
 
-Commit and push the changes to your buildpack to your Github fork, then push your sample app to Heroku to test.  You should see:
+Change the URL to your bucket's URL instead. Commit and push the changes to your buildpack to your Github fork, then push your sample app to Heroku to test.  You should see:
 
     -----> Installing dependencies using Bundler version 1.1.rc
-
-NOTE: You'll need to vendor the plugins, node, Bundler, and libyaml by running the rake tasks for the buildpack to work properly.
 
 ### Testing
 
